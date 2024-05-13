@@ -83,9 +83,22 @@ public class MemberDAO {
 		PreparedStatement pstmt = null;
 		String sql = null;
 		ResultSet rs = null;
-		MemberVO member = null;
+		MemberVO member = null; 
 		try {
-			
+			conn = DBUtil.getConnection();
+			sql="SELECT * FROM zmember LEFT OUTER JOIN zmember_detail USING(mem_num) WHERE id=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, id);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				member = new MemberVO();
+				member.setMem_num(rs.getInt("mem_num"));
+				member.setId(rs.getString("id"));
+				member.setAuth(rs.getInt("auth"));
+				member.setPasswd(rs.getString("passwd"));
+				member.setPhoto(rs.getString("photo"));
+				member.setEmail(rs.getString("email")); // 회원 탈퇴시에 필요한 정보
+			}
 		} catch (Exception e) {
 			throw new Exception(e);
 		} finally {
@@ -94,12 +107,60 @@ public class MemberDAO {
 		return member;
 	}
 	// 회원 상세 정보
-	
+	public MemberVO getMember(int mem_num) throws Exception{
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = null;
+		MemberVO member = null;
+		try {
+			conn = DBUtil.getConnection();
+			sql = "SELECT * FROM zmember_detail JOIN zmember USING(mem_num) WHERE mem_num=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, mem_num);
+			rs = pstmt.executeQuery();
+			if(rs.next()) {
+				member = new MemberVO();
+				member.setId(rs.getString("id"));
+				member.setName(rs.getString("name"));
+				member.setPhone(rs.getString("phone"));
+				member.setEmail(rs.getString("email"));
+				member.setZipcode(rs.getString("zipcode"));
+				member.setAddress1(rs.getString("address1"));
+				member.setAddress2(rs.getString("address2"));
+				member.setPhoto(rs.getString("photo"));
+				member.setReg_date(rs.getDate("reg_date"));
+				member.setModify_date(rs.getDate("modify_date"));
+			}
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			DBUtil.executeClose(rs, pstmt, conn);
+		}
+		return member;
+	}
 	// 회원 정보 수정
 	
 	// 비밀번호 수정
 	
 	// 프로필 사진 수정
+	public void updateMyPhoto(String photo, int mem_num) throws Exception{
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = null;
+		try {
+			conn= DBUtil.getConnection();
+			sql="UPDATE zmember_detail SET photo=? WHERE mem_num=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, photo);
+			pstmt.setInt(2, mem_num);
+			pstmt.executeUpdate();
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			DBUtil.executeClose(null, pstmt, conn);
+		}
+	}
 	
 	// 회원 탈퇴(회원의 개인정보 삭제 처리)
 	

@@ -7,6 +7,85 @@
 <title>Register Form</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
+<script type="text/javascript" src="<%= request.getContextPath() %>/js/jquery-3.7.1.min.js"></script>
+<script type="text/javascript">
+$(function(){
+	let idChecked = 0; // 0: 중복, id 중복 체크 미실시, 1: 미중복
+	
+	// 아이디 중복 체크
+	$('#id_check').click(function(){
+		if(!/^[A-Za-z0-9]{4,12}$/.test($('#id').val())){
+			alert('영문 또는 숫자 사용, 최소 4자 ~ 최대 12자 사용');
+			$('#id').val('').focus();
+			return;
+		}
+		
+		// 서버와 통신
+		$.ajax({
+			url:'checkDuplicatedId.do',
+			type:'post',
+			data:{id:$('#id').val()},
+			dataType: 'json',
+			success: function(param){
+				if(param.result=='idNotFound'){
+					idChecked = 1;
+					$('#message_id').css('color','black').text('등록 가능 ID');
+				}else if(param.result=='idDuplicated'){
+					idChecked = 0;
+					$('#message_id').css('color','red').text('중복된 ID');
+					$('#id').val('').focus();
+				} else{
+					idChecked=0;
+					alert('ID 중복 체크 오류 발생');
+				}
+			},
+			error:function(){
+				idChecked = 0;
+				alert('Network Error Occurred');
+			}
+		})
+		
+	});// end of Click
+	
+	// 아이디 중복 안내 메시지 초기화 및 아이디 중복 값 초기화
+	$('#register_form #id').keydown(function(){
+		idChecked = 0;
+		$('#message_id').text('');
+		
+	});// end of Keydown
+	
+	// 회원 정보 등록 유효성 체크
+	$('#register_form').submit(function(){
+		const items = document.querySelectorAll('.input-check');
+		for(let i=0; i<items.length; i++){
+			if(items[i].value.trim()==''){
+				const label = document.querySelector('label[for="'+items[i].id+'"]');
+				alert(label.textContent+' 필수 입력');
+				 items[i].value = '';
+		            items[i].focus();
+		            return false;
+		        } // if 4
+			
+		        if(items[i].id == 'id' && !/^[A-Za-z0-9]{4,12}$/.test($('#id').val())){
+		            alert('영문 또는 숫자 사용, 최소 4자 ~ 최대 12자 사용');
+		            $('#id').val('').focus();
+		            return false;
+		       } // if 2
+		       
+		        if(items[i].id == 'id' && idChecked == 0){
+		            alert('ID 중복 체크는 필수입니다.');
+		            return false;
+		        } // if 3
+		        
+		        if(items[i].id == 'zipcode' && !/^[0-9]{5}$/.test($('#zipcode').val())){
+		        	alert('우편 번호를 입력하세요(숫자 5자리)');
+		        	$('#zipcode').val('').focus();
+		            return false;
+		        }
+		}
+	}); // end of submit
+});
+</script>
 </head>
 <body>
 <div class="page-main">
@@ -19,7 +98,7 @@
 					<label for="id">ID</label>
 					<input type="text" id="id" name="id" class="input-check" maxlength="12" autocomplete="off">
 					<input type="button" value="Confirm ID" id="id_check">
-					<span id="messsage_id"></span>
+					<span id="message_id"></span>
 					<div class="form-notice">* English/Number(4~12)</div>
 				</li>
 				<li>
