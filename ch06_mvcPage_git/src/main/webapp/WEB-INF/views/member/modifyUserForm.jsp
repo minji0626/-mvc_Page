@@ -4,58 +4,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Register Form</title>
+<title>회원 정보 수정</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-3.7.1.min.js"></script>
 <script type="text/javascript">
 $(function(){
-	let idChecked = 0; // 0: 중복, id 중복 체크 미실시, 1: 미중복
-	
-	// 아이디 중복 체크
-	$('#id_check').click(function(){
-		if(!/^[A-Za-z0-9]{4,12}$/.test($('#id').val())){
-			alert('영문 또는 숫자 사용, 최소 4자 ~ 최대 12자 사용');
-			$('#id').val('').focus();
-			return;
-		}
-		
-		// 서버와 통신
-		$.ajax({
-			url:'checkDuplicatedId.do',
-			type:'post',
-			data:{id:$('#id').val()},
-			dataType: 'json',
-			success: function(param){
-				if(param.result=='idNotFound'){
-					idChecked = 1;
-					$('#message_id').css('color','black').text('등록 가능 ID');
-				}else if(param.result=='idDuplicated'){
-					idChecked = 0;
-					$('#message_id').css('color','red').text('중복된 ID');
-					$('#id').val('').focus();
-				} else{
-					idChecked=0;
-					alert('ID 중복 체크 오류 발생');
-				}
-			},
-			error:function(){
-				idChecked = 0;
-				alert('Network Error Occurred');
-			}
-		})
-		
-	});// end of Click
-	
-	// 아이디 중복 안내 메시지 초기화 및 아이디 중복 값 초기화
-	$('#register_form #id').keydown(function(){
-		idChecked = 0;
-		$('#message_id').text('');
-		
-	});// end of Keydown
-	
-	// 회원 정보 등록 유효성 체크
-	$('#register_form').submit(function(){
+	// 회원 정보 수정 유효성 체크
+	$('#modify_form').submit(function(){
 		const items = document.querySelectorAll('.input-check');
 		for(let i=0; i<items.length; i++){
 			if(items[i].value.trim()==''){
@@ -64,18 +20,7 @@ $(function(){
 				 items[i].value = '';
 		            items[i].focus();
 		            return false;
-		        } // if 4
-			
-		        if(items[i].id == 'id' && !/^[A-Za-z0-9]{4,12}$/.test($('#id').val())){
-		            alert('영문 또는 숫자 사용, 최소 4자 ~ 최대 12자 사용');
-		            $('#id').val('').focus();
-		            return false;
-		       } // if 2
-		       
-		        if(items[i].id == 'id' && idChecked == 0){
-		            alert('ID 중복 체크는 필수입니다.');
-		            return false;
-		        } // if 3
+		        }
 		        
 		        if(items[i].id == 'zipcode' && !/^[0-9]{5}$/.test($('#zipcode').val())){
 		        	alert('우편 번호를 입력하세요(숫자 5자리)');
@@ -91,19 +36,12 @@ $(function(){
 <div class="page-main">
 	<jsp:include page="/WEB-INF/views/common/header.jsp"/>
 	<div class="content-main">
-		<h2>Register Form</h2>
-		<form action="registerUser.do" id="register_form" method="post">
+		<h2>회원 정보 수정</h2>
+		<form action="modifyUser.do" id="modify_form" method="post">
 			<ul>
 				<li>
-					<label for="id">ID</label>
-					<input type="text" id="id" name="id" class="input-check" maxlength="12" autocomplete="off">
-					<input type="button" value="Confirm ID" id="id_check">
-					<span id="message_id"></span>
-					<div class="form-notice">* English/Number(4~12)</div>
-				</li>
-				<li>
 					<label for="name">이름</label>
-					<input type="text" id="name" name="name" class="input-check" maxlength="10" >
+					<input type="text" id="name" name="name" class="input-check" maxlength="10" value="${member.name}">
 				</li>
 				<li>
 					<label for="passwd">PW</label>
@@ -111,31 +49,31 @@ $(function(){
 				</li>
 				<li>
 					<label for="phone">전화 번호</label>
-					<input type="text" id="phone" name="phone" class="input-check" maxlength="15" >
+					<input type="text" id="phone" name="phone" class="input-check" maxlength="15" value="${member.phone}">
 				</li>
 				<li>
 					<label for="email">E-mail</label>
-					<input type="email" id="email" name="email" class="input-check" maxlength="50" >
+					<input type="email" id="email" name="email" class="input-check" maxlength="50" value="${member.email}">
 				</li>
 				<li>
 					<label for="zipcode">우편 번호</label>
-					<input type="text" id="zipcode" name="zipcode" class="input-check" maxlength="5" autocomplete="off">
+					<input type="text" id="zipcode" name="zipcode" class="input-check" maxlength="5" autocomplete="off" value="${member.zipcode }">
 					<input type="button" value="우편번호 찾기" onclick="execDaumPostcode()">
 				
 				</li>
 				<li>
 					<label for="address1">주소</label>
-					<input type="text" id="address1" name="address1" class="input-check" maxlength="30" >
+					<input type="text" id="address1" name="address1" class="input-check" maxlength="30" value="${member.address1 }">
 				</li>
 				<li>
 					<label for="address2">상세 주소</label>
-					<input type="text" id="address2" name="address2" class="input-check" maxlength="30" >
+					<input type="text" id="address2" name="address2" class="input-check" maxlength="30" value="${member.address2 }">
 				</li>
 			</ul>
 			
 			<div class="align-center">
-			<input type="submit" value="등록">
-			<input type="button" value="메인" onclick="location.href='${pageContext.request.contextPath}/main/main.do'">
+			<input type="submit" value="수정">
+			<input type="button" value="My Page" onclick="location.href='myPage.do'">
 			</div>
 			
 		</form>

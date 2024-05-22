@@ -3,6 +3,8 @@ package kr.member.dao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import kr.member.vo.MemberVO;
 import kr.util.DBUtil;
@@ -131,6 +133,8 @@ public class MemberDAO {
 				member.setPhoto(rs.getString("photo"));
 				member.setReg_date(rs.getDate("reg_date"));
 				member.setModify_date(rs.getDate("modify_date"));
+				member.setAuth(rs.getInt("auth"));
+				member.setMem_num(rs.getInt("mem_num"));
 			}
 		} catch (Exception e) {
 			throw new Exception(e);
@@ -140,9 +144,47 @@ public class MemberDAO {
 		return member;
 	}
 	// 회원 정보 수정
+	public void updateMember(MemberVO member) throws Exception{
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = null;
+		try {
+			conn = DBUtil.getConnection();
+			sql = "UPDATE zmember_detail SET name=?,phone=?,email=?,zipcode=?,address1=?,address2=?,modify_date=SYSDATE WHERE mem_num=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, member.getName());
+			pstmt.setString(2, member.getPhone());
+			pstmt.setString(3, member.getEmail());
+			pstmt.setString(4, member.getZipcode());
+			pstmt.setString(5, member.getAddress1());
+			pstmt.setString(6, member.getAddress2());
+			pstmt.setInt(7, member.getMem_num());
+			pstmt.executeUpdate();
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			DBUtil.executeClose(null, pstmt, conn);
+		}
+	}
 	
 	// 비밀번호 수정
-	
+	public void updatePassword(String passwd, int mem_num) throws Exception{
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = null;
+		try {
+			conn= DBUtil.getConnection();
+			sql="UPDATE zmember_detail SET passwd=? WHERE mem_num=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, passwd);
+			pstmt.setInt(2, mem_num);
+			pstmt.executeUpdate();
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			DBUtil.executeClose(null, pstmt, conn);
+		}
+	}
 	// 프로필 사진 수정
 	public void updateMyPhoto(String photo, int mem_num) throws Exception{
 		Connection conn = null;
@@ -162,10 +204,159 @@ public class MemberDAO {
 		}
 	}
 	
-	// 회원 탈퇴(회원의 개인정보 삭제 처리)
 	
+	// 회원 탈퇴(회원의 개인정보 삭제 처리)
+	public void deleteMember(int mem_num) throws Exception {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		PreparedStatement pstmt2 = null;
+		String sql = null;
+		try {
+			// 커넥션 풀로부터 커넥션 할당
+			conn = DBUtil.getConnection();
+			// 오토 커밋 해제
+			conn.setAutoCommit(false);
+			
+			// member의 auth값 변경
+			sql="UPDATE zmember SET auth=0 WHERE mem_num=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, mem_num);
+			pstmt.executeUpdate();
+			
+			//zmember_detail의 레코드 삭제
+			sql="DELETE FROM zmember_detail WHERE mem_num=?";
+			pstmt2 = conn.prepareStatement(sql);
+			pstmt2.setInt(1, mem_num);
+			pstmt2.executeUpdate();
+			
+			// 모든 sql문이 성공한다면 커밋
+			conn.commit();
+			
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			DBUtil.executeClose(null, pstmt2, null);
+			DBUtil.executeClose(null, pstmt, conn);
+		}
+	}
 	
 	// 관리자가 사용하는 기능
 	// 전체 내용 개수, 검색 내용 개수
+	public int getMemberCountByAdmin(String keyfield, String keyword) throws Exception{
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = null;
+		String sub_sql = "";
+		int count = 0;
+		try {
+			
+			conn = DBUtil.getConnection();
+			
+			if(keyword != null && !"".equals(keyword)) {
+				// 검색 처리
+				if(keyfield.equals("1")) {
+					sub_sql += "WHERE id LIKE '%' || ? || '%'";
+				}
+				else if(keyfield.equals("2")) {
+					sub_sql += "WHERE name LIKE '%' || ? || '%'";
+				}else if(keyfield.equals("3")) {
+					sub_sql += "WHERE email LIKE '%' || ? || '%'";
+				}
+			}
+			sql="SELECT COUNT(*) FROM zmember LEFT OUTER JOIN zmember_detail USING(mem_num) " + sub_sql;
+			pstmt = conn.prepareStatement(sql);
+			if(keyword!=null && !"".equals(keyword)) {
+				pstmt.setString(1, keyword);
+			}
+			rs=pstmt.executeQuery();
+			if(rs.next()) {
+				count = rs.getInt(1);
+			}
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			DBUtil.executeClose(rs, pstmt, conn);
+		}
+		return count;
+	}
 	// 목록, 검색 목록
+	public List<MemberVO> getListMemberByAdmin(int start, int end, String keyfield, String keyword) throws Exception{
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		List<MemberVO> list = null;
+		String sql=null;
+		String sub_sql = "";
+		int cnt = 0;
+		try {
+			conn = DBUtil.getConnection();
+			if(keyword != null && !"".equals(keyword)) {
+				// 검색 처리
+				if(keyfield.equals("1")) {
+					sub_sql += "WHERE id LIKE '%' || ? || '%'";
+				}
+				else if(keyfield.equals("2")) {
+					sub_sql += "WHERE name LIKE '%' || ? || '%'";
+				}else if(keyfield.equals("3")) {
+					sub_sql += "WHERE email LIKE '%' || ? || '%'";
+				}
+			}
+			
+			sql="SELECT * FROM(SELECT a.*,rownum rnum FROM (SELECT * FROM zmember LEFT OUTER JOIN zmember_detail USING(mem_num) " + sub_sql + " ORDER BY mem_num DESC)a) WHERE rnum >=? AND rnum<=?";
+			pstmt = conn.prepareStatement(sql);
+			
+			if(keyword!=null && !"".equals(keyword)) {
+				pstmt.setString(++cnt, keyword);
+			}
+			
+			pstmt.setInt(++cnt, start);
+			pstmt.setInt(++cnt, end);
+			rs= pstmt.executeQuery();
+			
+			list = new ArrayList<MemberVO>();
+			while (rs.next()) {
+				MemberVO member = new MemberVO();
+				member.setMem_num(rs.getInt("mem_num"));
+				member.setId(rs.getString("id"));
+				member.setAuth(rs.getInt("auth"));
+				member.setName(rs.getString("name"));
+				member.setEmail(rs.getString("email"));
+				member.setPhone(rs.getString("phone"));
+				member.setReg_date(rs.getDate("reg_date"));
+				
+				list.add(member);
+				
+			}
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			DBUtil.executeClose(rs, pstmt, conn);
+		}
+		return list;
+	}
+	
+	// 회원 등급 수정
+	public void updateMemberByAdmin(int auth, int mem_num) throws Exception{
+		Connection conn = null;
+		PreparedStatement pstmt = null;
+		String sql = null;
+		
+		try {
+			conn = DBUtil.getConnection();
+			sql="UPDATE zmember SET auth=? WHERE mem_num=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setInt(1, auth);
+			pstmt.setInt(2, mem_num);
+			pstmt.executeUpdate();
+		} catch (Exception e) {
+			throw new Exception(e);
+		} finally {
+			DBUtil.executeClose(null, pstmt, conn);
+		}
+		
+	}
+	
+	
+	
 }
