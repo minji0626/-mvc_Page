@@ -12,21 +12,29 @@ public class DetailAction implements Action{
 
 	@Override
 	public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		//글번호 반환
+		int board_num = Integer.parseInt(
+				        request.getParameter("board_num"));
 		
-		request.setCharacterEncoding("UTF-8");
-		
-		int board_num = Integer.parseInt(request.getParameter("board_num"));
-		
-		BoardVO board = new BoardVO();
 		BoardDAO dao = BoardDAO.getInstance();
+		//조회수 증가
 		dao.updateReadcount(board_num);
 		
-		board = dao.getBoard(board_num);
+		BoardVO board = dao.getBoard(board_num);
+		//HTML를 허용하지 않음
 		board.setTitle(StringUtil.useNoHTML(board.getTitle()));
+		//HTML를 허용하지 않으면서 줄바꿈
 		board.setContent(StringUtil.useBrNoHTML(board.getContent()));
-		request.setAttribute("board", board);
+		
+		request.setAttribute("board", board);		
 		
 		return "/WEB-INF/views/board/detail.jsp";
 	}
 
 }
+
+
+
+
+
+

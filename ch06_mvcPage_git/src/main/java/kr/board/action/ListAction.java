@@ -14,7 +14,6 @@ public class ListAction implements Action{
 
 	@Override
 	public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		
 		String pageNum = request.getParameter("pageNum");
 		if(pageNum == null) pageNum = "1";
 		
@@ -24,17 +23,28 @@ public class ListAction implements Action{
 		BoardDAO dao = BoardDAO.getInstance();
 		int count = dao.getBoardCount(keyfield, keyword);
 		
-		PagingUtil page = new PagingUtil(keyfield, keyword, Integer.parseInt(pageNum), count, 10,10,"list.do");
+		//페이지 처리
+		PagingUtil page = new PagingUtil(keyfield,keyword,
+				         Integer.parseInt(pageNum),
+				                  count,20,10,"list.do");
 		
 		List<BoardVO> list = null;
 		if(count > 0) {
-			list = dao.getList(page.getStartRow(), page.getEndRow(), keyfield, keyword);
+			list = dao.getListBoard(page.getStartRow(),
+					page.getEndRow(),keyfield,keyword);
 		}
+		
 		request.setAttribute("count", count);
 		request.setAttribute("list", list);
 		request.setAttribute("page", page.getPage());
 		
+		//JSP 경로 반환
 		return "/WEB-INF/views/board/list.jsp";
 	}
-	
+
 }
+
+
+
+
+

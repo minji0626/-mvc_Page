@@ -17,27 +17,30 @@ public class MyPageAction implements Action{
 	@Override
 	public String execute(HttpServletRequest request, HttpServletResponse response) throws Exception {
 		
-		request.setCharacterEncoding("utf-8");
-		
 		HttpSession session = request.getSession();
-		Integer user_num = (Integer)session.getAttribute("user_num");
-		
-		if(user_num == null) { // 로그인 되지 않은 경우
+		Integer user_num = 
+				(Integer)session.getAttribute("user_num");
+		if(user_num == null) {//로그인이 되지 않은 경우
 			return "redirect:/member/loginForm.do";
 		}
-		
-		// 로그인 완료 후
+		//로그인이 된 경우
+		//회원정보
 		MemberDAO dao = MemberDAO.getInstance();
 		MemberVO member = dao.getMember(user_num);
 		
-		// 관심 게시물 정보
+		//관심 게시물 정보
 		BoardDAO boardDAO = BoardDAO.getInstance();
-		List<BoardVO> boardList = boardDAO.getListBoardFav(1, 5, user_num);
+		List<BoardVO> boardList = 
+				boardDAO.getListBoardFav(1, 5, user_num);
 		
-		request.setAttribute("member", member);
+		request.setAttribute("member", member);		
 		request.setAttribute("boardList", boardList);
 		
+		//JSP 경로 반환
 		return "/WEB-INF/views/member/myPage.jsp";
 	}
 
 }
+
+
+

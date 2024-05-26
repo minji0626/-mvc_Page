@@ -3,25 +3,24 @@ package kr.member.vo;
 import java.sql.Date;
 
 public class MemberVO {
-	private int mem_num; 		// 회원 번호
-	private String id;			// 회원 아이디
-	private int auth;			// 회원 등급
+	private int mem_num;		//회원 번호
+	private String id;			//아이디
+	private int auth;			//회원 등급
+	private String name;		//이름
+	private String passwd;		//비밀번호
+	private String phone;		//전화번호
+	private String email;		//이메일
+	private String zipcode;		//우편번호
+	private String address1;	//주소
+	private String address2;	//상세 주소
+	private String photo;		//프로필 사진
+	private Date reg_date;		//가입일
+	private Date modify_date;	//수정일
 	
-	private String name;		// 이름
-	private String passwd;		// 비밀번호
-	private String phone;		// 전화번호	
-	private String email;		// 이메일
-	private String zipcode;		// 우편번호
-	private String address1;	// 주소
-	private String address2;	// 상세 주소
-	private String photo;		// 프로필 사진
-	private Date reg_date;		// 가입일
-	private Date modify_date;	// 수정일
-	
+	//비밀번호 일치 여부 체크
 	public boolean isCheckedPassword(String userPasswd) {
-		// 회원 등급(auth) : 0: 탈퇴회원, 1: 정지회원, 2:일반회원, 9:관리자
-		// 0, 1 은 로그인하지 못하게 조건을 설정해준다.
-		if(auth>1 && passwd.equals(userPasswd)) {
+		//회원 등급(auth) : 0탈퇴회원,1정지회원,2일반회원,9관리자
+		if(auth > 1 && passwd.equals(userPasswd)) {
 			return true;
 		}
 		return false;
@@ -107,3 +106,9 @@ public class MemberVO {
 	}
 	
 }
+
+
+
+
+
+

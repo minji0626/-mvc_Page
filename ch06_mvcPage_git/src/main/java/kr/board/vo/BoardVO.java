@@ -3,32 +3,19 @@ package kr.board.vo;
 import java.sql.Date;
 
 public class BoardVO {
-	private int board_num;			// 글 번호	
-	private String title;			// 제목
-	private String content;			// 내용
-	private int hit;				// 조회수
-	private Date reg_date;			// 등록일
-	private Date modify_date;		// 수정일
-	private String filename;		// 파일 이름
-	private String ip;				// IP 주소
-	private int mem_num;			// 회원 번호
+	private int board_num; 		//글번호
+	private String title;		//제목
+	private String content;		//내용
+	private int hit;			//조회수
+	private Date reg_date;		//등록일
+	private Date modify_date;	//수정일
+	private String filename;	//파일명
+	private String ip;			//ip주소
+	private int mem_num;		//회원번호
 	
-	private String id;				// 회원 아이디
-	private String photo;			// 회원 프로필 사진명
+	private String id;			//회원아이디
+	private String photo;		//회원 프로필 사진명
 	
-	
-	public String getId() {
-		return id;
-	}
-	public void setId(String id) {
-		this.id = id;
-	}
-	public String getPhoto() {
-		return photo;
-	}
-	public void setPhoto(String photo) {
-		this.photo = photo;
-	}
 	public int getBoard_num() {
 		return board_num;
 	}
@@ -83,4 +70,26 @@ public class BoardVO {
 	public void setMem_num(int mem_num) {
 		this.mem_num = mem_num;
 	}
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getPhoto() {
+		return photo;
+	}
+	public void setPhoto(String photo) {
+		this.photo = photo;
+	}
+	
+	
+	
+	
 }
+
+
+
+
+
+

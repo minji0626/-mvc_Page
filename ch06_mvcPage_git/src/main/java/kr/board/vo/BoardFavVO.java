@@ -24,4 +24,5 @@ public class BoardFavVO {
 		this.mem_num = mem_num;
 	}
 	
+	
 }
