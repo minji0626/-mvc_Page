@@ -4,32 +4,31 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>회원정보 수정</title>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css" type="text/css">
+<title>회원 정보 수정</title>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
 <script type="text/javascript" src="${pageContext.request.contextPath}/js/jquery-3.7.1.min.js"></script>
 <script type="text/javascript">
 $(function(){
-	//회원정보 수정 유효성 체크
+	// 회원 정보 수정 유효성 체크
 	$('#modify_form').submit(function(){
 		const items = document.querySelectorAll('.input-check');
-		for(let i=0;i<items.length;i++){
+		for(let i=0; i<items.length; i++){
 			if(items[i].value.trim()==''){
-				const label = document.querySelector(
-						       'label[for="'+items[i].id+'"]');
-				alert(label.textContent + ' 항목은 필수 입력');
-				items[i].value = '';
-				items[i].focus();
-				return false;
-			}
-			if(items[i].id == 'zipcode' 
-					&& !/^[0-9]{5}$/.test($('#zipcode').val())){
-				alert('우편번호를 입력하세요(숫자5자리)');
-				$('#zipcode').val('').focus();
-				return false;
-			}
+				const label = document.querySelector('label[for="'+items[i].id+'"]');
+				alert(label.textContent+' 필수 입력');
+				 items[i].value = '';
+		            items[i].focus();
+		            return false;
+		        }
+		        
+		        if(items[i].id == 'zipcode' && !/^[0-9]{5}$/.test($('#zipcode').val())){
+		        	alert('우편 번호를 입력하세요(숫자 5자리)');
+		        	$('#zipcode').val('').focus();
+		            return false;
+		        }
 		}
-	});
-	
+	}); // end of submit
 });
 </script>
 </head>
@@ -37,58 +36,61 @@ $(function(){
 <div class="page-main">
 	<jsp:include page="/WEB-INF/views/common/header.jsp"/>
 	<div class="content-main">
-		<h2>회원정보 수정</h2>
-		<form id="modify_form" action="modifyUser.do"
-		                                      method="post">
+		<h2>회원 정보 수정</h2>
+		<form action="modifyUser.do" id="modify_form" method="post">
 			<ul>
 				<li>
 					<label for="name">이름</label>
-					<input type="text" name="name" id="name"
-					  value="${member.name}" maxlength="10" class="input-check">
+					<input type="text" id="name" name="name" class="input-check" maxlength="10" value="${member.name}">
 				</li>
 				<li>
-					<label for="phone">전화번호</label>
-					<input type="text" name="phone" id="phone"
-					 value="${member.phone}" maxlength="15" class="input-check">
+					<label for="passwd">PW</label>
+					<input type="password" id="passwd" name="passwd" class="input-check" maxlength="12" >
 				</li>
 				<li>
-					<label for="email">이메일</label>
-					<input type="email" name="email" id="email"
-					 value="${member.email}" maxlength="50" class="input-check">
+					<label for="phone">전화 번호</label>
+					<input type="text" id="phone" name="phone" class="input-check" maxlength="15" value="${member.phone}">
 				</li>
 				<li>
-					<label for="zipcode">우편번호</label>
-					<input type="text" name="zipcode" id="zipcode"
-					  maxlength="5" autocomplete="off" 
-					   value="${member.zipcode}"  class="input-check">
-					<input type="button" value="우편번호 찾기" 
-					                onclick="execDaumPostcode()">                         
+					<label for="email">E-mail</label>
+					<input type="email" id="email" name="email" class="input-check" maxlength="50" value="${member.email}">
+				</li>
+				<li>
+					<label for="zipcode">우편 번호</label>
+					<input type="text" id="zipcode" name="zipcode" class="input-check" maxlength="5" autocomplete="off" value="${member.zipcode }">
+					<input type="button" value="우편번호 찾기" onclick="execDaumPostcode()">
+				
 				</li>
 				<li>
 					<label for="address1">주소</label>
-					<input type="text" name="address1" id="address1"
-					  value="${member.address1}" maxlength="30" class="input-check">
+					<input type="text" id="address1" name="address1" class="input-check" maxlength="30" value="${member.address1 }">
 				</li>
 				<li>
-					<label for="address2">나머지 주소</label>
-					<input type="text" name="address2" id="address2"
-					 value="${member.address2}" maxlength="30" class="input-check">
+					<label for="address2">상세 주소</label>
+					<input type="text" id="address2" name="address2" class="input-check" maxlength="30" value="${member.address2 }">
 				</li>
-			</ul>    
+			</ul>
+			
 			<div class="align-center">
-				<input type="submit" value="수정">
-				<input type="button" value="My페이지"
-				    onclick="location.href='myPage.do'">
-			</div>                                  
+			<input type="submit" value="수정">
+			<input type="button" value="My Page" onclick="location.href='myPage.do'">
+			</div>
+			
 		</form>
+		
 		<!-- 다음 우편번호 API 시작 -->
-<!-- iOS에서는 position:fixed 버그가 있음, 적용하는 사이트에 맞게 position:absolute 등을 이용하여 top,left값 조정 필요 -->
-<div id="layer" style="display:none;position:fixed;overflow:hidden;z-index:1;-webkit-overflow-scrolling:touch;">
-<img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnCloseLayer" style="cursor:pointer;position:absolute;right:-3px;top:-3px;z-index:1" onclick="closeDaumPostcode()" alt="닫기 버튼">
-</div>
+			<!-- iOS에서는 position:fixed 버그가 있음, 적용하는 사이트에 맞게 position:absolute 등을 이용하여 top,left값 조정 필요 -->
+			<div id="layer"
+				style="display: none; position: fixed; overflow: hidden; z-index: 1; -webkit-overflow-scrolling: touch;">
+				<img src="//t1.daumcdn.net/postcode/resource/images/close.png"
+					id="btnCloseLayer"
+					style="cursor: pointer; position: absolute; right: -3px; top: -3px; z-index: 1"
+					onclick="closeDaumPostcode()" alt="닫기 버튼">
+			</div>
 
-<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
-<script>
+			<script
+				src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+			<script>
     // 우편번호 찾기 화면을 넣을 element
     var element_layer = document.getElementById('layer');
 
@@ -161,9 +163,9 @@ $(function(){
         initLayerPosition();
     }
 
-    // 브라우저의 크기 변경에 따라 레이어를 가운데로 이동시키고자 하실때에는
-    // resize이벤트나, orientationchange이벤트를 이용하여 값이 변경될때마다 아래 함수를 실행 시켜 주시거나,
-    // 직접 element_layer의 top,left값을 수정해 주시면 됩니다.
+   	 // 브라우저의 크기 변경에 따라 레이어를 가운데로 이동시키고자 하실때에는
+   	 // resize이벤트나, orientationchange이벤트를 이용하여 값이 변경될때마다 아래 함수를 실행 시켜 주시거나,
+   	 // 직접 element_layer의 top,left값을 수정해 주시면 됩니다.
     function initLayerPosition(){
         var width = 300; //우편번호서비스가 들어갈 element의 width
         var height = 400; //우편번호서비스가 들어갈 element의 height
@@ -177,15 +179,9 @@ $(function(){
         element_layer.style.left = (((window.innerWidth || document.documentElement.clientWidth) - width)/2 - borderWidth) + 'px';
         element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
     }
-</script>		
-		<!-- 다음 우편번호 API 끝 -->
-	</div>
+</script>
+<!-- 다음 우편번호 API 끝 -->
+</div>
 </div>
 </body>
 </html>
-
-
-
-
-
-
